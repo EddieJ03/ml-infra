@@ -220,14 +220,6 @@ new TraefikRoute(
   { provider: k8sprovider }
 );
 
-/**
- * 
- * Setting up DNS Zone + A Record
- * Helpful Link: https://learn.microsoft.com/en-us/azure/dns/dns-getstarted-portal
- * To find IP of Traefik load balancer, go to your Pulumi stack, go to dev, under resources, and look for traefik core:Service, then scroll down
- * 
- */
-
 
 
 
