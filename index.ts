@@ -53,7 +53,7 @@ const cluster = new azure.containerservice.ManagedCluster("mlplatform-k8s", {
   identity: {
     type: "SystemAssigned",
   },
-  agentPoolProfiles: [
+  agentPoolProfiles: [ // each agent pool is group of VMs with same configuration
     {
       name: "agentpool",
       count: 2,
@@ -71,7 +71,7 @@ const cluster = new azure.containerservice.ManagedCluster("mlplatform-k8s", {
   networkProfile: {
     networkPlugin: "azure",
     loadBalancerSku: "standard",
-  },
+  }
 });
 
 const aksPostgresFirewallRule = new azure.dbforpostgresql.FirewallRule(
@@ -169,12 +169,14 @@ const k8sprovider = new k8s.Provider("k8s-provider", {
  * 
  * MLFlow container on AKS
  * 
+ * If deployment fails cuz of loop backoff: kubectl logs mlflow-5d7d856c96-qkqpk -c mlflow
+ * 
  */
 const mlflow = new k8s.helm.v3.Chart(
   "mlflow",
   {
     chart: "mlflow",
-    fetchOpts: { repo: "https://larribas.me/helm-charts" },
+    fetchOpts: { repo: "https://community-charts.github.io/helm-charts" },
     values: {
       backendStore: {
         postgres: {
@@ -182,11 +184,15 @@ const mlflow = new k8s.helm.v3.Chart(
           host: mlflowDBServer.fullyQualifiedDomainName,
           port: 5432,
           database: database.name,
-          username: "postgres",
+          user: "postgres",
           password: mlflowDBPassword.result,
         },
       },
-      defaultArtifactRoot: pulumi.interpolate`https://mlinfrastorage.blob.core.windows.net/artifact-storage`,
+      artifactRoot: {
+        azureBlob: {
+          accessKey: primaryStorageKey
+        }
+      }
     },
   },
   {
@@ -219,18 +225,3 @@ new TraefikRoute(
   },
   { provider: k8sprovider }
 );
-
-
-
-
-// const mlflowNamespace = new k8s.core.v1.Namespace('mlflow-namespace', {
-//   metadata: { name: 'mlflow' },
-// }, { provider: k8sprovider });
-
-// const mlflowServiceAccount = new BlobServiceAccount('mlflow-service-account', {
-//   namespace: mlflowNamespace.metadata.name,
-//   resourceGroupName: resourceGroup.name,
-//   storageAccountName: storageAccount.name,
-//   containerName: blobContainer.name,
-//   readOnly: false,
-// }, { provider: k8sprovider });

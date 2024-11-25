@@ -41,7 +41,7 @@ export default class TraefikRoute extends pulumi.ComponentResource {
 
     middlewares.push({ name: trailingSlashMiddleware.metadata.name });
 
-    // Strip prefix
+    // Strip prefix b/c internal service will just use /, not /prefix...
     if (args.stripPrefix || args.stripPrefix === undefined) {
       const stripPrefixMiddleware = new k8s.apiextensions.CustomResource(
         `${name}-strip-prefix`,
@@ -68,13 +68,13 @@ export default class TraefikRoute extends pulumi.ComponentResource {
         kind: "IngressRoute",
         metadata: { namespace: args.namespace },
         spec: {
-          entryPoints: ["web"],
+          entryPoints: ["web"], // HTTP
           routes: [
             {
               match: `PathPrefix(\`${args.prefix}\`)`,
               kind: "Rule",
               middlewares,
-              services: [
+              services: [ // ports deteremines which service to route the request to
                 {
                   name:
                     typeof args.service === "string"
@@ -84,7 +84,7 @@ export default class TraefikRoute extends pulumi.ComponentResource {
                     ? args.port
                     : typeof args.service !== "string"
                     ? pulumi.output(args.service).spec.ports[0].port
-                    : 80,
+                    : 80, // default to 80
                 },
               ],
             },
