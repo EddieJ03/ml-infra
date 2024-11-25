@@ -92,16 +92,6 @@ const storageAccount = new azure.storage.StorageAccount("ml-storage", {
   encryption: {
     keySource: azure.storage.KeySource.Microsoft_Storage,
     requireInfrastructureEncryption: false,
-    services: {
-      blob: {
-        enabled: true,
-        keyType: azure.storage.KeyType.Account,
-      },
-      file: {
-        enabled: true,
-        keyType: azure.storage.KeyType.Account,
-      },
-    },
   },
   keyPolicy: {
     keyExpirationPeriodInDays: 20,
@@ -121,8 +111,6 @@ const storageAccount = new azure.storage.StorageAccount("ml-storage", {
 // blob container resource
 const blobContainer = new azure.storage.BlobContainer("artifact-storage", {
   accountName: storageAccount.name,
-  defaultEncryptionScope: "encryptionscope185",
-  denyEncryptionScopeOverride: true,
   resourceGroupName: resourceGroup.name,
 });
 
@@ -190,7 +178,11 @@ const mlflow = new k8s.helm.v3.Chart(
       },
       artifactRoot: {
         azureBlob: {
-          accessKey: primaryStorageKey
+          enabled: true,
+          accessKey: primaryStorageKey,
+          storageAccount: storageAccount.name,
+          container: blobContainer.name,
+          connectionString: pulumi.interpolate`DefaultEndpointsProtocol=https;AccountName=mlinfrastorage;AccountKey=${primaryStorageKey};EndpointSuffix=core.windows.net`
         }
       }
     },
