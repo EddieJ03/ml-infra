@@ -217,3 +217,28 @@ new TraefikRoute(
   },
   { provider: k8sprovider }
 );
+
+
+// Create an Azure Container Registry
+const registry = new azure.containerregistry.Registry("mlregistry", {
+  resourceGroupName: resourceGroup.name,
+  sku: {
+      name: "Basic",
+  },
+  adminUserEnabled: true,
+  location: resourceGroup.location,
+});
+
+const resourceGroupName = resourceGroup.name;
+
+// Get the admin credentials for the Azure Container Registry
+const credentials = pulumi.all([resourceGroup.name, registry.name]).apply(([resourceGroupName, registryName]) => 
+  azure.containerregistry.listRegistryCredentials({
+      resourceGroupName: resourceGroupName,
+      registryName: registryName,
+  })
+);
+
+export const adminUsername = credentials.apply(c => c.username!);
+export const adminPassword = credentials.apply(c => c.passwords![0].value!);
+export const registryUrl = registry.loginServer;
