@@ -55,7 +55,7 @@ const cluster = new azure.containerservice.ManagedCluster("mlplatform-k8s", {
   agentPoolProfiles: [ // each agent pool is group of VMs with same configuration
     {
       name: "agentpool",
-      count: 2,
+      count: 1,
       vmSize: "standard_b2s",
       mode: "System",
       maxPods: 110,
@@ -64,12 +64,12 @@ const cluster = new azure.containerservice.ManagedCluster("mlplatform-k8s", {
       // Enable autoscaling
       enableAutoScaling: true,
       minCount: 1,
-      maxCount: 5,
+      maxCount: 1,
     },
   ],
   networkProfile: {
     networkPlugin: "azure",
-    loadBalancerSku: "standard",
+    loadBalancerSku: "basic",
   }
 });
 
