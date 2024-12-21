@@ -10,4 +10,6 @@ Then run `pulumi up --yes --skip-preview` to set up all the defined resources on
 See previously ran experiments: http://minimlplatform.duckdns.org/mlflow
 
 Train & Deploy your own model from here: https://github.com/EddieJ03/model-template
-- Example of a model I have created and deployed: https://github.com/EddieJ03/review-predictions-model
+- Example of models I have created and deployed:
+    - https://github.com/EddieJ03/review-predictions-model
+    - https://github.com/EddieJ03/translation-model
