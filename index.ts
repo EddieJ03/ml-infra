@@ -156,7 +156,7 @@ const k8sprovider = new k8s.Provider("k8s-provider", {
  * 
  * MLFlow container on AKS
  * 
- * If deployment fails cuz of loop backoff: kubectl logs mlflow-5d7d856c96-qkqpk -c mlflow
+ * If deployment fails cuz of loop backoff run: kubectl logs <container name> -c mlflow
  * 
  */
 const mlflow = new k8s.helm.v3.Chart(
